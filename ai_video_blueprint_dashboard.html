@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Blueprint Dashboard</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- PrismJS for Code Editor -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- Configuration & Custom Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        surface: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 8px 30px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        
+        .upload-zone.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        /* Hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="bg-surface-50 text-slate-800 font-sans antialiased min-h-screen flex overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden transition-opacity opacity-0 pointer-events-none"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
+        <div class="h-16 flex items-center px-6 border-b border-slate-100">
+            <div class="flex items-center gap-3 text-primary-600">
+                <i data-lucide="video" class="w-7 h-7"></i>
+                <span class="text-xl font-bold tracking-tight text-slate-900">Blueprint<span class="text-primary-600">AI</span></span>
+            </div>
+            <button id="close-sidebar" class="ml-auto lg:hidden text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="px-4 py-6 flex-1 flex flex-col gap-2">
+            <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Menu</p>
+            
+            <!-- Tambahkan class nav-item dan data-target untuk JS Navigation -->
+            <a href="#" data-target="dashboard" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 text-slate-400 nav-icon"></i>
+                <span class="font-medium">Dashboard</span>
+                <div class="active-indicator ml-auto w-1.5 h-6 bg-primary-600 rounded-full hidden"></div>
+            </a>
+            
+            <a href="#" data-target="blueprint" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-50 text-primary-700 transition-colors">
+                <i data-lucide="sparkles" class="w-5 h-5 text-primary-600 nav-icon"></i>
+                <span class="font-medium">AI Video Blueprint</span>
+                <div class="active-indicator ml-auto w-1.5 h-6 bg-primary-600 rounded-full"></div>
+            </a>
+            
+            <a href="#" data-target="history" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                <i data-lucide="history" class="w-5 h-5 text-slate-400 nav-icon"></i>
+                <span class="font-medium">History</span>
+                <div class="active-indicator ml-auto w-1.5 h-6 bg-primary-600 rounded-full hidden"></div>
+            </a>
+            
+            <a href="#" data-target="settings" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors mt-auto">
+                <i data-lucide="settings" class="w-5 h-5 text-slate-400 nav-icon"></i>
+                <span class="font-medium">Settings</span>
+                <div class="active-indicator ml-auto w-1.5 h-6 bg-primary-600 rounded-full hidden"></div>
+            </a>
+        </div>
+        
+        <!-- Storage usage widget in sidebar -->
+        <div class="p-6 border-t border-slate-100">
+            <div class="bg-surface-50 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-700">Credits</span>
+                    <span class="text-xs font-bold text-primary-600">12 / 50</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                    <div class="bg-primary-600 h-1.5 rounded-full" style="width: 24%"></div>
+                </div>
+                <button class="mt-3 w-full py-2 text-sm text-primary-600 font-medium hover:bg-primary-50 rounded-lg transition-colors">Upgrade Plan</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-surface-50">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 z-30 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button id="open-sidebar" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                
+                <!-- Breadcrumbs -->
+                <div class="hidden sm:flex items-center gap-2 text-sm text-slate-500">
+                    <span>Projects</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    <span class="text-slate-900 font-medium">New Blueprint</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-5">
+                
+                <!-- Notifikasi Dropdown -->
+                <div class="relative">
+                    <button id="notif-btn" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors relative">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <!-- Popup Dropdown -->
+                    <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-card border border-slate-100 z-50 overflow-hidden origin-top-right">
+                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="font-semibold text-slate-900">Notifications</h3>
+                            <button class="text-xs text-primary-600 hover:text-primary-700 font-medium">Mark all read</button>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <div class="p-4 border-b border-slate-50 hover:bg-surface-50 cursor-pointer transition-colors">
+                                <p class="text-sm text-slate-800"><span class="font-bold">Video Blueprint</span> for "Premium Coffee" is ready to download!</p>
+                                <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> 2 mins ago</p>
+                            </div>
+                            <div class="p-4 hover:bg-surface-50 cursor-pointer transition-colors">
+                                <p class="text-sm text-slate-800">Welcome to <b>BlueprintAI</b>! Get started by creating your first highly-converting video project.</p>
+                                <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> 1 day ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-px h-6 bg-slate-200 hidden sm:block"></div>
+                
+                <!-- Profil Dropdown -->
+                <div class="relative">
+                    <button id="profile-btn" class="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none">
+                        <div class="text-right hidden sm:block">
+                            <p id="header-user-name" class="text-sm font-medium text-slate-900 leading-none">Alex Morgan</p>
+                            <p class="text-xs text-slate-500 mt-1">Pro Plan</p>
+                        </div>
+                        <img id="header-user-avatar" src="https://ui-avatars.com/api/?name=Alex+Morgan&background=e2e8f0&color=475569" alt="User" class="w-9 h-9 rounded-full ring-2 ring-white">
+                    </button>
+                    <!-- Popup Dropdown -->
+                    <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-card border border-slate-100 z-50 overflow-hidden origin-top-right">
+                        <div class="py-2">
+                            <a href="#" class="px-4 py-2 text-sm text-slate-700 hover:bg-surface-50 flex items-center gap-2.5 transition-colors"><i data-lucide="user" class="w-4 h-4 text-slate-400"></i> My Profile</a>
+                            <a href="#" class="px-4 py-2 text-sm text-slate-700 hover:bg-surface-50 flex items-center gap-2.5 transition-colors"><i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i> Billing</a>
+                            <div class="border-t border-slate-100 my-1"></div>
+                            <a href="#" class="px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors"><i data-lucide="log-out" class="w-4 h-4 text-red-500"></i> Log out</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10 relative">
+            
+            <!-- MENGGANTI WRAPPER MENJADI VIEW: BLUEPRINT (Aktif secara default) -->
+            <div id="view-blueprint" class="view-section max-w-4xl mx-auto space-y-8 pb-24 block">
+                
+                <!-- Page Title -->
+                <div class="animate-fade-in">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">AI Video Blueprint</h1>
+                    <p class="mt-2 text-lg text-slate-500">Upload your product, choose the category, and let AI generate a professional video blueprint.</p>
+                </div>
+
+                <!-- Main Form Card -->
+                <div class="bg-white rounded-[20px] shadow-card border border-slate-100 p-6 sm:p-8 animate-fade-in" style="animation-delay: 0.1s;">
+                    <form id="blueprint-form" class="space-y-8 relative z-20">
+                        
+                        <!-- 1. Upload Product Photo -->
+                        <div>
+                            <div class="flex justify-between items-end mb-3">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-900">Upload Product Photo</label>
+                                    <p class="text-xs text-slate-500 mt-1">Upload 1–5 product images. AI will automatically use the best image.</p>
+                                </div>
+                                <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-md" id="file-count">0/5</span>
+                            </div>
+                            
+                            <div id="upload-zone" class="upload-zone relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center bg-surface-50 hover:bg-surface-100 hover:border-slate-300 transition-all cursor-pointer group">
+                                <input type="file" id="file-upload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*" multiple>
+                                
+                                <div id="upload-prompt" class="flex flex-col items-center justify-center space-y-4 pointer-events-none">
+                                    <div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center text-primary-500 group-hover:scale-110 transition-transform duration-300">
+                                        <i data-lucide="image-plus" class="w-8 h-8"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-700"><span class="text-primary-600">Click to upload</span> or drag and drop</p>
+                                        <p class="text-xs text-slate-400 mt-1">PNG, JPG, WEBP (Max 10MB per file)</p>
+                                    </div>
+                                </div>
+
+                                <!-- Image Previews Container -->
+                                <div id="image-previews" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-4 relative z-20">
+                                    <!-- Previews injected here via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Product Name -->
+                        <div>
+                            <label for="product-name" class="block text-sm font-semibold text-slate-900 mb-2">Product Name</label>
+                            <input type="text" id="product-name" placeholder="Example: Premium Organic Coffee Beans" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white placeholder-slate-400 text-slate-900 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all shadow-sm">
+                        </div>
+
+                        <!-- Two Column Grid for Category & Goal -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            
+                            <!-- 3. Product Category -->
+                            <div>
+                                <label for="product-category" class="block text-sm font-semibold text-slate-900 mb-2">Product Category</label>
+                                <div class="relative">
+                                    <select id="product-category" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 appearance-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all shadow-sm cursor-pointer">
+                                        <option value="" disabled selected>Select a category...</option>
+                                        <option value="food">Food</option>
+                                        <option value="beverage">Beverage</option>
+                                        <option value="beauty">Beauty & Skincare</option>
+                                        <option value="fashion">Fashion</option>
+                                        <option value="accessories">Accessories</option>
+                                        <option value="health">Health</option>
+                                        <option value="household">Household</option>
+                                        <option value="tools">Tools</option>
+                                        <option value="electronics">Electronics</option>
+                                        <option value="automotive">Automotive</option>
+                                        <option value="furniture">Furniture</option>
+                                        <option value="pet">Pet Care</option>
+                                        <option value="others">Others</option>
+                                    </select>
+                                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <!-- 4. Video Goal -->
+                            <div>
+                                <label for="video-goal" class="block text-sm font-semibold text-slate-900 mb-2">Video Goal</label>
+                                <div class="relative">
+                                    <select id="video-goal" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 appearance-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all shadow-sm cursor-pointer">
+                                        <option value="" disabled selected>What is the main objective?</option>
+                                        <option value="promotion">Promotion (Sales focus)</option>
+                                        <option value="branding">Branding (Awareness)</option>
+                                        <option value="discount">Discount Campaign</option>
+                                        <option value="launch">New Product Launch</option>
+                                        <option value="education">Product Education</option>
+                                    </select>
+                                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Video Ratio (Custom Dropdown for Icons) -->
+                        <div class="relative z-30">
+                            <label class="block text-sm font-semibold text-slate-900 mb-2">Video Ratio</label>
+                            
+                            <div class="relative custom-select-wrapper" id="ratio-dropdown">
+                                <!-- Trigger Button -->
+                                <button type="button" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 flex items-center justify-between focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all shadow-sm select-none" id="ratio-trigger">
+                                    <div class="flex items-center gap-3" id="ratio-selected-content">
+                                        <span class="text-slate-400">Choose aspect ratio</span>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-200" id="ratio-icon"></i>
+                                </button>
+                                
+                                <!-- Options Menu -->
+                                <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg opacity-0 invisible translate-y-2 transition-all duration-200 origin-top max-h-52 overflow-y-auto" id="ratio-menu">
+                                    <div class="p-2 space-y-1">
+                                        
+                                        <!-- Option 9:16 -->
+                                        <div class="ratio-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-50 cursor-pointer transition-colors" data-value="9:16">
+                                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center border border-slate-200">
+                                                <div class="w-3 h-5 border-[1.5px] border-slate-600 rounded-[3px]"></div>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900">9:16 (Vertical)</p>
+                                                <p class="text-xs text-slate-500">Reels, TikTok, Shorts</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Option 1:1 -->
+                                        <div class="ratio-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-50 cursor-pointer transition-colors" data-value="1:1">
+                                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center border border-slate-200">
+                                                <div class="w-4 h-4 border-[1.5px] border-slate-600 rounded-[2px]"></div>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900">1:1 (Square)</p>
+                                                <p class="text-xs text-slate-500">Instagram Feed</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Option 4:5 -->
+                                        <div class="ratio-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-50 cursor-pointer transition-colors" data-value="4:5">
+                                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center border border-slate-200">
+                                                <div class="w-4 h-5 border-[1.5px] border-slate-600 rounded-[2px]"></div>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900">4:5 (Portrait)</p>
+                                                <p class="text-xs text-slate-500">Instagram Portrait</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Option 16:9 -->
+                                        <div class="ratio-option flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-50 cursor-pointer transition-colors" data-value="16:9">
+                                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center border border-slate-200">
+                                                <div class="w-5 h-3 border-[1.5px] border-slate-600 rounded-[2px]"></div>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900">16:9 (Landscape)</p>
+                                                <p class="text-xs text-slate-500">YouTube, Standard Web</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!-- Hidden input to store value -->
+                                <input type="hidden" name="video_ratio" id="video-ratio-input">
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Generate Button -->
+                    <div class="mt-8 pt-6 border-t border-slate-100 relative z-10">
+                        <button id="generate-btn" class="w-full relative overflow-hidden group bg-primary-600 hover:bg-primary-700 text-white rounded-xl py-4 font-semibold text-lg flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed">
+                            <!-- Background shine effect on hover -->
+                            <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite] transition-all"></div>
+                            
+                            <span id="btn-text" class="flex items-center gap-2 relative z-10">
+                                <i data-lucide="sparkles" class="w-5 h-5 text-blue-200"></i>
+                                Generate AI Video Blueprint
+                            </span>
+                            
+                            <!-- Loading Spinner (Hidden by default) -->
+                            <div id="btn-loader" class="hidden absolute inset-0 flex items-center justify-center bg-primary-700 z-20 gap-3">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Generating Video Prompt...</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output Section -->
+                <div class="animate-fade-in" style="animation-delay: 0.2s;">
+                    <h2 class="text-xl font-bold text-slate-900 mb-1">Generated AI Blueprint</h2>
+                    <p class="text-sm text-slate-500 mb-4">Your personalized video strategy and script will appear here.</p>
+                    
+                    <div id="output-card" class="bg-white rounded-[20px] shadow-sm border border-slate-200 p-2 relative overflow-hidden transition-all duration-500 min-h-[300px] flex items-center justify-center">
+                        
+                        <!-- Empty State -->
+                        <div id="output-empty-state" class="text-center p-12">
+                            <div class="w-20 h-20 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
+                                <i data-lucide="bot" class="w-10 h-10 text-slate-400"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-700 mb-2">Awaiting Instructions</h3>
+                            <p class="text-sm text-slate-500 max-w-sm mx-auto">Fill out the form above and hit generate to create a highly converting video blueprint tailored to your product.</p>
+                        </div>
+
+                        <!-- JSON Editor State (Hidden initially) -->
+                        <div id="output-editor-state" class="hidden w-full h-full flex flex-col absolute inset-0 bg-[#121212] z-10 rounded-[19px] overflow-hidden">
+                            <!-- Toolbar -->
+                            <div class="flex items-center justify-between px-4 py-3 bg-[#1e1e1e] border-b border-[#333] shrink-0">
+                                <span class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                                    <i data-lucide="layers" class="w-4 h-4 text-blue-400"></i> 3 Creative Concepts Generated
+                                </span>
+                                <button id="download-json-btn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors border border-blue-500 shadow-sm">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Download All
+                                </button>
+                            </div>
+                            
+                            <!-- Editor Area (Scrollable Container for the 3 Concepts) -->
+                            <div class="flex-1 overflow-y-auto p-4 space-y-6" id="concepts-container">
+                                <!-- Concepts will be injected here by JS -->
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+            </div> <!-- END OF VIEW: BLUEPRINT -->
+
+            <!-- VIEW: DASHBOARD (Awalnya tersembunyi) -->
+            <div id="view-dashboard" class="view-section hidden max-w-5xl mx-auto space-y-8 pb-24">
+                <div class="animate-fade-in">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+                    <p class="mt-2 text-lg text-slate-500">Overview of your AI video generation activity and stats.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.1s;">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="video" class="w-7 h-7"></i></div>
+                        <div><p class="text-slate-500 text-sm font-medium">Total Blueprints</p><h3 class="text-2xl font-bold text-slate-900 mt-1">24</h3></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
+                        <div class="w-14 h-14 bg-green-50 text-green-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="check-circle" class="w-7 h-7"></i></div>
+                        <div><p class="text-slate-500 text-sm font-medium">Credits Available</p><h3 class="text-2xl font-bold text-slate-900 mt-1">38</h3></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
+                        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="clock" class="w-7 h-7"></i></div>
+                        <div><p class="text-slate-500 text-sm font-medium">Time Saved (Est.)</p><h3 class="text-2xl font-bold text-slate-900 mt-1">12 hrs</h3></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 animate-fade-in" style="animation-delay: 0.2s;">
+                    <h3 class="text-lg font-bold text-slate-900 mb-6">Recent Activity</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-surface-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer border border-transparent hover:border-slate-200">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white rounded-lg shadow-sm border border-slate-100 flex items-center justify-center shrink-0"><i data-lucide="file-json" class="w-6 h-6 text-blue-500"></i></div>
+                                <div>
+                                    <p class="font-semibold text-slate-900">Premium Organic Coffee Beans</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">Food/Beverage • 16:9 • Generated 2 mins ago</p>
+                                </div>
+                            </div>
+                            <button class="hidden sm:block text-sm font-medium text-primary-600 hover:text-primary-700 bg-primary-50 px-4 py-2 rounded-lg">View Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: HISTORY (Awalnya tersembunyi) -->
+            <div id="view-history" class="view-section hidden max-w-5xl mx-auto space-y-8 pb-24">
+                <div class="animate-fade-in">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">History</h1>
+                    <p class="mt-2 text-lg text-slate-500">Access and download your previously generated AI video blueprints.</p>
+                </div>
+                
+                <div class="bg-white rounded-[20px] shadow-sm border border-slate-200 overflow-hidden animate-fade-in" style="animation-delay: 0.1s;">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-sm text-slate-500">
+                                    <th class="py-4 px-6 font-semibold">Project Name</th>
+                                    <th class="py-4 px-6 font-semibold">Category</th>
+                                    <th class="py-4 px-6 font-semibold">Date</th>
+                                    <th class="py-4 px-6 font-semibold text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                    <td class="py-4 px-6 font-medium text-slate-900">Minimalist Smartwatch V2</td>
+                                    <td class="py-4 px-6 text-slate-500"><span class="px-2.5 py-1 bg-slate-100 rounded-md">Electronics</span></td>
+                                    <td class="py-4 px-6 text-slate-500">Oct 24, 2023</td>
+                                    <td class="py-4 px-6 text-right">
+                                        <button class="px-3 py-1.5 text-xs font-medium bg-white border border-slate-200 rounded-md hover:bg-slate-50 shadow-sm flex inline-flex items-center gap-1.5 ml-auto">
+                                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Download
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                    <td class="py-4 px-6 font-medium text-slate-900">Hydration Serum Campaign</td>
+                                    <td class="py-4 px-6 text-slate-500"><span class="px-2.5 py-1 bg-slate-100 rounded-md">Beauty</span></td>
+                                    <td class="py-4 px-6 text-slate-500">Oct 20, 2023</td>
+                                    <td class="py-4 px-6 text-right">
+                                        <button class="px-3 py-1.5 text-xs font-medium bg-white border border-slate-200 rounded-md hover:bg-slate-50 shadow-sm flex inline-flex items-center gap-1.5 ml-auto">
+                                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Download
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SETTINGS (Awalnya tersembunyi) -->
+            <div id="view-settings" class="view-section hidden max-w-3xl mx-auto space-y-8 pb-24">
+                <div class="animate-fade-in">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Settings</h1>
+                    <p class="mt-2 text-lg text-slate-500">Manage your account preferences and configurations.</p>
+                </div>
+                
+                <div class="bg-white rounded-[20px] shadow-sm border border-slate-200 p-6 sm:p-8 animate-fade-in" style="animation-delay: 0.1s;">
+                    <h3 class="text-lg font-bold text-slate-900 mb-6">Profile Information</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-6">
+                            <img id="settings-user-avatar" src="https://ui-avatars.com/api/?name=Alex+Morgan&background=e2e8f0&color=475569" alt="User" class="w-20 h-20 rounded-full border-4 border-slate-50">
+                            <div>
+                                <button class="px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 text-sm transition-colors border border-slate-200 shadow-sm">Change Avatar</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-900 mb-2">Full Name</label>
+                                <input type="text" id="settings-full-name" value="Alex Morgan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-900 mb-2">Email Address</label>
+                                <input type="email" id="settings-email" value="alex.morgan@example.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-sm">
+                            </div>
+                        </div>
+                        
+                        <hr class="border-slate-100 my-8">
+                        
+                        <h3 class="text-lg font-bold text-slate-900 mb-4">Preferences</h3>
+                        <div class="flex items-center justify-between p-4 bg-surface-50 rounded-xl border border-slate-100">
+                            <div>
+                                <h4 class="font-medium text-slate-900">Email Notifications</h4>
+                                <p class="text-sm text-slate-500 mt-1">Receive alerts when generation is complete</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="settings-notif-toggle" value="" class="sr-only peer" checked>
+                              <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="pt-6 border-t border-slate-100">
+                            <button id="save-settings-btn" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-sm transition-all flex items-center justify-center gap-2 w-full sm:w-auto disabled:opacity-70 disabled:cursor-not-allowed">
+                                <span id="save-settings-text">Save Changes</span>
+                                <svg id="save-settings-loader" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- UI Logic Script -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Navigation & View Switching Logic ---
+            const navItems = document.querySelectorAll('.nav-item');
+            const viewSections = document.querySelectorAll('.view-section');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Ambil target view dari data-target atribut
+                    const targetViewId = item.getAttribute('data-target');
+                    
+                    // Reset styling pada semua item menu
+                    navItems.forEach(nav => {
+                        nav.classList.remove('bg-primary-50', 'text-primary-700');
+                        nav.classList.add('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
+                        
+                        const icon = nav.querySelector('.nav-icon');
+                        if(icon) {
+                            icon.classList.remove('text-primary-600');
+                            icon.classList.add('text-slate-400');
+                        }
+                        
+                        const indicator = nav.querySelector('.active-indicator');
+                        if(indicator) {
+                            indicator.classList.add('hidden');
+                        }
+                    });
+                    
+                    // Berikan styling active pada item yang diklik
+                    item.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
+                    item.classList.add('bg-primary-50', 'text-primary-700');
+                    
+                    const activeIcon = item.querySelector('.nav-icon');
+                    if(activeIcon) {
+                        activeIcon.classList.remove('text-slate-400');
+                        activeIcon.classList.add('text-primary-600');
+                    }
+                    
+                    const activeIndicator = item.querySelector('.active-indicator');
+                    if(activeIndicator) {
+                        activeIndicator.classList.remove('hidden');
+                    }
+                    
+                    // Sembunyikan semua view dan tampilkan view yang relevan
+                    viewSections.forEach(view => {
+                        if(view.id === 'view-' + targetViewId) {
+                            view.classList.remove('hidden');
+                            view.classList.add('block');
+                            
+                            // Trigger ulang animasi fade-in agar mulus saat dibuka
+                            const animatedElements = view.querySelectorAll('.animate-fade-in');
+                            animatedElements.forEach(el => {
+                                el.style.animation = 'none';
+                                el.offsetHeight; /* trigger reflow */
+                                el.style.animation = null; 
+                            });
+                        } else {
+                            view.classList.add('hidden');
+                            view.classList.remove('block');
+                        }
+                    });
+
+                    // Tutup sidebar otomatis di mode mobile setelah klik menu
+                    if(window.innerWidth < 1024) {
+                        toggleSidebar(false);
+                    }
+                });
+            });
+
+            // --- Header Dropdowns Logic (Notif & Profil) ---
+            const notifBtn = document.getElementById('notif-btn');
+            const notifDropdown = document.getElementById('notif-dropdown');
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+
+            function toggleDropdown(dropdownToToggle, otherDropdown) {
+                const isHidden = dropdownToToggle.classList.contains('hidden');
+                
+                // Selalu tutup dropdown yang satunya
+                otherDropdown.classList.add('hidden');
+                otherDropdown.classList.remove('animate-fade-in');
+
+                if(isHidden) {
+                    dropdownToToggle.classList.remove('hidden');
+                    dropdownToToggle.classList.add('animate-fade-in');
+                } else {
+                    dropdownToToggle.classList.add('hidden');
+                    dropdownToToggle.classList.remove('animate-fade-in');
+                }
+            }
+
+            notifBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDropdown(notifDropdown, profileDropdown);
+            });
+
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDropdown(profileDropdown, notifDropdown);
+            });
+
+            // Tutup dropdown jika user klik area kosong di luar dropdown
+            document.addEventListener('click', (e) => {
+                if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+                    notifDropdown.classList.add('hidden');
+                }
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+
+
+            // --- Mobile Sidebar Toggle ---
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const openBtn = document.getElementById('open-sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+
+            function toggleSidebar(show) {
+                if(show) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                    // slight delay to allow display block to apply before opacity transition
+                    setTimeout(() => {
+                        overlay.classList.remove('opacity-0');
+                        overlay.classList.add('opacity-100', 'pointer-events-auto');
+                    }, 10);
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.remove('opacity-100', 'pointer-events-auto');
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                }
+            }
+
+            openBtn.addEventListener('click', () => toggleSidebar(true));
+            closeBtn.addEventListener('click', () => toggleSidebar(false));
+            overlay.addEventListener('click', () => toggleSidebar(false));
+
+            // --- Custom Ratio Dropdown Logic ---
+            const ratioTrigger = document.getElementById('ratio-trigger');
+            const ratioMenu = document.getElementById('ratio-menu');
+            const ratioIcon = document.getElementById('ratio-icon');
+            const ratioInput = document.getElementById('video-ratio-input');
+            const ratioSelectedContent = document.getElementById('ratio-selected-content');
+            const ratioOptions = document.querySelectorAll('.ratio-option');
+
+            function toggleRatioMenu() {
+                const isExpanded = ratioMenu.classList.contains('opacity-100');
+                if (isExpanded) {
+                    closeRatioMenu();
+                } else {
+                    ratioMenu.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+                    ratioMenu.classList.add('opacity-100', 'visible', 'translate-y-0');
+                    ratioIcon.classList.add('rotate-180');
+                    ratioTrigger.classList.add('border-primary-500', 'ring-4', 'ring-primary-500/10');
+                }
+            }
+
+            function closeRatioMenu() {
+                ratioMenu.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                ratioMenu.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                ratioIcon.classList.remove('rotate-180');
+                ratioTrigger.classList.remove('border-primary-500', 'ring-4', 'ring-primary-500/10');
+            }
+
+            ratioTrigger.addEventListener('click', toggleRatioMenu);
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!ratioTrigger.contains(e.target) && !ratioMenu.contains(e.target)) {
+                    closeRatioMenu();
+                }
+            });
+
+            ratioOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const value = option.getAttribute('data-value');
+                    const htmlContent = option.innerHTML; // Copy the icon and text
+                    
+                    // Update trigger UI
+                    ratioSelectedContent.innerHTML = htmlContent;
+                    
+                    // Style adjustments for selected view vs menu view
+                    const subtext = ratioSelectedContent.querySelector('p.text-xs');
+                    if (subtext) {
+                       subtext.classList.add('hidden'); // hide subtext in selected state
+                    }
+                    
+                    const title = ratioSelectedContent.querySelector('p.text-sm');
+                    if (title) {
+                       title.classList.replace('text-sm', 'text-base');
+                    }
+
+                    // Update hidden input
+                    ratioInput.value = value;
+                    
+                    closeRatioMenu();
+                });
+            });
+
+
+            // --- File Upload Logic ---
+            const dropZone = document.getElementById('upload-zone');
+            const fileInput = document.getElementById('file-upload');
+            const uploadPrompt = document.getElementById('upload-prompt');
+            const previewsContainer = document.getElementById('image-previews');
+            const fileCountBadge = document.getElementById('file-count');
+            
+            let uploadedFiles = [];
+            const MAX_FILES = 5;
+
+            // Drag and Drop Events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            }, false);
+
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+                this.value = ''; // Reset input to allow selecting same file again if removed
+            });
+
+            function handleFiles(files) {
+                const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+                
+                if (uploadedFiles.length + newFiles.length > MAX_FILES) {
+                    alert(`You can only upload a maximum of ${MAX_FILES} images.`);
+                    return;
+                }
+
+                newFiles.forEach(file => {
+                    uploadedFiles.push(file);
+                    createPreview(file);
+                });
+
+                updateUploadUI();
+            }
+
+            function createPreview(file) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                
+                reader.onloadend = function() {
+                    const previewWrapper = document.createElement('div');
+                    previewWrapper.className = 'relative aspect-square rounded-xl overflow-hidden shadow-sm group animate-fade-in cursor-default';
+                    // Stop event bubbling so clicking a preview doesn't trigger upload
+                    previewWrapper.addEventListener('click', (e) => e.stopPropagation());
+                    
+                    const img = document.createElement('img');
+                    img.src = reader.result;
+                    img.className = 'w-full h-full object-cover';
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'absolute top-1.5 right-1.5 w-6 h-6 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-slate-700 hover:bg-red-50 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm';
+                    removeBtn.innerHTML = '<i data-lucide="x" class="w-3.5 h-3.5"></i>';
+                    removeBtn.type = 'button';
+                    
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation(); // Prevent opening file dialog
+                        removeFile(file, previewWrapper);
+                    };
+
+                    previewWrapper.appendChild(img);
+                    previewWrapper.appendChild(removeBtn);
+                    previewsContainer.appendChild(previewWrapper);
+                    lucide.createIcons({root: previewWrapper});
+                }
+            }
+
+            function removeFile(fileToRemove, elementToRemove) {
+                uploadedFiles = uploadedFiles.filter(file => file !== fileToRemove);
+                elementToRemove.remove();
+                updateUploadUI();
+            }
+
+            function updateUploadUI() {
+                fileCountBadge.textContent = `${uploadedFiles.length}/${MAX_FILES}`;
+                
+                if (uploadedFiles.length > 0) {
+                    uploadPrompt.classList.add('hidden');
+                    previewsContainer.classList.remove('hidden');
+                    dropZone.classList.remove('p-8');
+                    dropZone.classList.add('p-4');
+                } else {
+                    uploadPrompt.classList.remove('hidden');
+                    previewsContainer.classList.add('hidden');
+                    dropZone.classList.add('p-8');
+                    dropZone.classList.remove('p-4');
+                }
+            }
+
+
+            // --- AI JSON Generation & UI Logic ---
+            const generateBtn = document.getElementById('generate-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnLoader = document.getElementById('btn-loader');
+            const outputEmpty = document.getElementById('output-empty-state');
+            const outputEditor = document.getElementById('output-editor-state');
+            const outputCard = document.getElementById('output-card');
+            const conceptsContainer = document.getElementById('concepts-container');
+            const downloadBtn = document.getElementById('download-json-btn');
+            let fullJSONData = {};
+
+            function generateDynamicJSON(name, category, goal, ratio) {
+                const productName = name || "Produk Premium";
+                const cat = category || "others";
+                const vRatio = ratio || "16:9";
+
+                // Map category to specific advertising intelligence
+                const intel = {
+                    food: { props: "Bahan segar, uap panas memikat, saus, talenan kayu estetik", env: "Dapur premium modern yang hangat", problem: "Rasa lapar, butuh kepuasan instan dan hidangan menggugah selera", solution: "Kenikmatan rasa maksimal dari suapan pertama", action: "Tangan elegan menuangkan, memotong, atau menyajikan dengan perlahan", texture: "Tetesan bumbu, tekstur renyah, embun segar, asap mengepul", light: "Pencahayaan natural pagi yang hangat (warm backlighting)" },
+                    beverage: { props: "Es batu kristal, embun di gelas, cipratan air, daun mint", env: "Kafe estetis atau bar premium", problem: "Rasa haus dan butuh kesegaran premium", solution: "Sensasi dahaga hilang dengan kesegaran absolut", action: "Tangan menuangkan cairan ke dalam gelas dengan gerakan memutar (swirl)", texture: "Embun dingin (condensation), gelembung karbonasi, kilau cairan", light: "Pencahayaan rim light kontras tinggi" },
+                    beauty: { props: "Kaca jernih, percikan air, kelopak bunga segar, sutra lembut", env: "Meja rias mewah bergaya minimalis", problem: "Kulit kusam, butuh perawatan ekstra dan hasil instan", solution: "Kulit bercahaya, sehat, dan memancarkan kemewahan", action: "Jari tangan lentik dan mulus mengusap lembut atau mengambil tekstur krim", texture: "Cairan glossy, krim lembut, tetesan embun menyegarkan", light: "Softbox studio yang terang, merata, tanpa bayangan keras" },
+                    electronics: { props: "Meja hitam matte, lampu LED neon tipis, partikel debu artistik", env: "Studio teknologi futuristik bernuansa gelap", problem: "Kurangnya efisiensi dan kecanggihan dalam aktivitas harian", solution: "Teknologi presisi tinggi yang mempermudah hidup", action: "Tangan tegas menekan tombol atau menyentuh layar dengan presisi", texture: "Logam sikat (brushed metal), kaca premium, permukaan matte", light: "Chiaroscuro (gelap terang kontras) dengan highlight neon" },
+                    furniture: { props: "Tanaman hias indoor, buku estetis, selimut rajut, karpet tebal", env: "Ruang tamu arsitektur modern bermandikan cahaya matahari", problem: "Ruangan terasa kosong atau kurang nyaman", solution: "Kenyamanan paripurna dengan estetika kelas atas", action: "Tangan merapikan bantal atau menyentuh serat kain dengan halus", texture: "Serat kayu alami, jahitan kain premium, kulit halus", light: "Cahaya matahari natural melewati tirai (window blind shadows)" },
+                    fashion: { props: "Platform minimalis, latar belakang seamless warna solid", env: "Studio editorial fashion high-end", problem: "Kebutuhan tampil menonjol dan percaya diri", solution: "Gaya tak terbantahkan yang menarik semua perhatian", action: "Tangan berpose elegan membetulkan atau memegang produk", texture: "Detail jahitan mahakarya, kilau logam aksesoris, serat kain", light: "Pencahayaan dramatis hard-light ala pemotretan majalah" }
+                };
+
+                const catData = intel[cat] || { props: "Podium minimalis premium, elemen geometris, pantulan cermin tipis", env: "Studio komersial premium yang bersih", problem: "Rutinitas yang kurang efisien atau butuh peningkatan gaya hidup", solution: "Desain inovatif dan kualitas yang mempermudah hidup", action: "Tangan memegang, menggunakan, atau meletakkan produk dengan elegan", texture: "Permukaan matte/glossy premium, pantulan cahaya metalik", light: "Pencahayaan dramatis dengan highlight aksen" };
+                const negPrompt = ["wajah", "wajah manusia", "kepala", "mata", "orang berbicara", "kualitas amatir", "kartun", "ilustrasi murah", "grainy", "watermark", "jari lebih dari lima", "bentuk tangan aneh", "teks berantakan", "latar belakang kotor"];
+
+                // Concept 1: Product Attraction (Visual Hero)
+                const concept1 = {
+                    project: { title: `Visual Hero Concept - ${productName}`, product_name: productName, category: cat, ratio: vRatio },
+                    creative_direction: { commercial_style: "High-end Product Showcase Commercial", visual_theme: "Mewah, bersih, sangat detail (Macro-focused).", emotional_trigger: "Desire (Hasrat memiliki karena keindahan visual).", main_message: "Kesempurnaan bentuk dan material yang tak tertandingi.", target_audience: "Konsumen premium yang mengutamakan kualitas visual dan desain." },
+                    advertising_strategy: { positioning: "Produk sebagai mahakarya seni (Art piece).", key_differentiator: "Detail tekstur dan kualitas bahan yang superior.", campaign_tone: "Elegan, percaya diri, dan memukau." },
+                    hook: { duration: "0:00 - 0:02", objective: "Menghipnotis penonton dengan detail makro yang ekstrim.", visual_description: `Extreme Macro Close-up pada ${catData.texture} dari ${productName}. Kamera bergerak sangat lambat (slow push-in).` },
+                    storyline: { summary: "Eksplorasi visual murni yang menyoroti setiap sudut, lekukan, dan material premium produk.", scene_count: "3" },
+                    scenes: [
+                        { scene: 1, duration: "3 detik", purpose: "Visual Hook", product_focus: `Fokus ekstrim pada ${catData.texture}`, hand_action: "Tidak ada interaksi manusia", camera_angle: "Extreme Macro", camera_movement: "Slow panning melintasi permukaan produk", composition: "Memenuhi seluruh layar (Fill the frame)", background: "Latar studio gelap atau warna solid netral", lighting: catData.light, visual_effect: "Slow motion 120fps", on_screen_text: "KESEMPURNAAN DETAIL.", transition: "Whip pan" },
+                        { scene: 2, duration: "3 detik", purpose: "Menunjukkan bentuk keseluruhan (Form)", product_focus: "Siluet dan desain produk secara utuh", hand_action: "Tidak ada interaksi manusia", camera_angle: "Low angle (Sudut bawah)", camera_movement: "Orbit rotasi 45 derajat mengelilingi produk", composition: "Center framing di atas podium", background: "Studio dengan efek kabut/asap tipis di lantai", lighting: "Rim lighting kuat memisahkan produk dari latar", visual_effect: "Pantulan cahaya (Lens flare) dinamis", on_screen_text: "DESAIN TANPA KOMPROMI.", transition: "Crossfade" },
+                        { scene: 3, duration: "4 detik", purpose: "Hero Shot & CTA", product_focus: "Produk beserta kemasan premiumnya", hand_action: "Tidak ada interaksi manusia", camera_angle: "Eye level", camera_movement: "Pull out lambat (Kamera mundur)", composition: "Simetris di tengah", background: "Studio bersih tanpa distraksi", lighting: "Pencahayaan terang merata (High key lighting)", visual_effect: "Fokus sangat tajam", on_screen_text: "MILIKI SEKARANG.", transition: "Fade to black" }
+                    ],
+                    cinematography: { color_palette: "Palet warna komersial yang kaya dan kontras tinggi.", lighting_style: catData.light, depth_of_field: "Sangat dangkal (Macro f/2.8) pada awal, tajam (f/8) pada akhir.", focus_strategy: "Fokus absolut pada tekstur produk.", visual_quality: "Resolusi 8k, photorealistic, standar iklan televisi global." },
+                    audio_direction: { music_style: "Musik elektronik ambient yang mewah dan berdentum lambat.", sound_effects: "Suara 'swoosh' halus dan foley tekstur (misal: suara gesekan material).", voice_over: "Tanpa voice over, biarkan visual yang berbicara." },
+                    call_to_action: { headline: "Rasakan Kemewahannya.", supporting_text: "Eksklusif tersedia hari ini.", closing_message: "Kunjungi situs web kami." },
+                    negative_prompt: negPrompt,
+                    master_prompt: `Iklan televisi komersial resolusi 8k, rasio ${vRatio} untuk produk ${productName}. Tema visual: Mewah, bersih, dan berfokus pada detail makro. Scene diawali dengan Extreme Macro Close-up menyoroti ${catData.texture}. Kamera melakukan orbit lambat mengelilingi produk yang diletakkan di atas ${catData.props}. ${catData.light}. Latar belakang berupa studio komersial premium yang elegan. Produk adalah pahlawan absolut dalam video ini. Transisi mulus, depth of field dangkal f/2.8 untuk memisahkan produk dari latar. SANGAT PENTING: DILARANG KERAS MENAMPILKAN WAJAH, KEPALA, ATAU MATA MANUSIA SAMA SEKALI. Tidak ada manusia dalam frame. Kualitas sinematografi mahakarya setara agensi periklanan papan atas.`
+                };
+
+                // Concept 2: Lifestyle Experience
+                const concept2 = {
+                    project: { title: `Lifestyle Experience - ${productName}`, product_name: productName, category: cat, ratio: vRatio },
+                    creative_direction: { commercial_style: "Cinematic Lifestyle Advertising", visual_theme: "Hangat, relatable, natural, dan berkelas.", emotional_trigger: "Kenyamanan, kebahagiaan, dan aspirasi gaya hidup.", main_message: "Produk ini menyatu sempurna dan meningkatkan kualitas keseharian Anda.", target_audience: "Konsumen yang mencari fungsionalitas dipadukan dengan gaya hidup modern." },
+                    advertising_strategy: { positioning: "Bagian tak terpisahkan dari gaya hidup ideal.", key_differentiator: "Pengalaman penggunaan (User experience) yang memuaskan dan elegan.", campaign_tone: "Bersahabat, aspirasional, dan hangat." },
+                    hook: { duration: "0:00 - 0:02", objective: "Membangun suasana (mood) dan menunjukkan aksi penggunaan produk.", visual_description: `Medium close-up aksi manusia: ${catData.action} produk ${productName} di dalam ${catData.env}.` },
+                    storyline: { summary: "Membawa penonton ke dalam sebuah momen gaya hidup sempurna di mana produk menjadi pendorong utama momen tersebut.", scene_count: "3" },
+                    scenes: [
+                        { scene: 1, duration: "3 detik", purpose: "Menunjukkan aksi dan integrasi gaya hidup", product_focus: "Produk saat sedang digunakan", hand_action: catData.action, camera_angle: "Over the shoulder atau Point of View (POV)", camera_movement: "Kamera mengikuti gerakan tangan (Hand follow, gimbal smooth)", composition: "Rule of thirds, produk dan tangan mendominasi frame", background: `${catData.env} dengan depth of field blur sempurna (bokeh)`, lighting: "Pencahayaan natural volumetrik", visual_effect: "Pergerakan natural, sinematik 24fps", on_screen_text: "GAYA HIDUP MODERN.", transition: "Match cut pada gerakan" },
+                        { scene: 2, duration: "3 detik", purpose: "Menyoroti efek/hasil penggunaan", product_focus: "Detail interaksi antara produk dan lingkungan", hand_action: "Tangan melepaskan produk atau menikmati hasil", camera_angle: "Medium Shot", camera_movement: "Tracking shot sejajar lambat", composition: "Keseimbangan antara produk dan elemen gaya hidup", background: catData.env, lighting: "Pencahayaan hangat (Warm tone)", visual_effect: "Cahaya matahari (Sun flare) masuk ke lensa", on_screen_text: "LEBIH BERMAKNA.", transition: "Optical blur" },
+                        { scene: 3, duration: "4 detik", purpose: "Hero Shot terintegrasi & CTA", product_focus: "Produk terletak indah di lingkungan aslinya", hand_action: "Hanya tangan yang bersedekap di latar atau sekadar frame pendukung (Tanpa wajah)", camera_angle: "Eye level", camera_movement: "Slow pan mendatar", composition: "Framing organik dengan properti di sekeliling", background: catData.env, lighting: "Pencahayaan natural", visual_effect: "Warna (Color grading) sinematik hangat", on_screen_text: "TINGKATKAN KESEHARIANMU.\nBeli Sekarang.", transition: "Fade to black" }
+                    ],
+                    cinematography: { color_palette: "Warna-warna bumi (Earth tones) yang hangat dan natural.", lighting_style: "Pencahayaan naturalistik volumetrik.", depth_of_field: "Dangkal (f/1.8) untuk menciptakan efek bokeh pada latar belakang gaya hidup.", focus_strategy: "Fokus pada titik interaksi antara tangan dan produk.", visual_quality: "8k, gaya film sinematik komersial." },
+                    audio_direction: { music_style: "Musik akustik lo-fi atau instrumen yang menenangkan dan positif.", sound_effects: "Suara lingkungan yang realistis (ASMR gaya hidup).", voice_over: "Suara narator yang hangat dan bersahabat." },
+                    call_to_action: { headline: "Rasakan Bedanya.", supporting_text: "Jadikan milik Anda hari ini.", closing_message: "Klik tautan." },
+                    negative_prompt: negPrompt,
+                    master_prompt: `Iklan gaya hidup sinematik rasio ${vRatio} untuk produk ${productName}. Tema visual: Natural, hangat, dan berkelas. Adegan berlokasi di ${catData.env} dengan pencahayaan matahari natural (volumetric lighting). Sebuah tangan dengan kulit sehat dan proporsional melakukan aksi: ${catData.action}. Di sekitar produk terdapat ${catData.props}. Kamera menggunakan teknik gimbal tracking mengikuti gerakan tangan dengan mulus. Background blur (bokeh f/1.8) sangat indah. Tone warna hangat. Kualitas fotorealistik 8K. ATURAN MUTLAK: DILARANG KERAS MENAMPILKAN WAJAH, MATA, ATAU KEPALA MANUSIA. JANGAN ADA ORANG BERBICARA. Hanya boleh memperlihatkan tangan dan lengan bawah yang berinteraksi dengan produk secara realistis dan elegan.`
+                };
+
+                // Concept 3: Problem Solution
+                const concept3 = {
+                    project: { title: `Problem Solution - ${productName}`, product_name: productName, category: cat, ratio: vRatio },
+                    creative_direction: { commercial_style: "Dynamic Problem-Solution Advertisement", visual_theme: "Transisi kontras dari gelap/kusam (masalah) ke terang/berkilau (solusi).", emotional_trigger: "Kelegaan, pencerahan, dan kepercayaan.", main_message: "Produk ini adalah jawaban elegan dari masalah Anda.", target_audience: "Konsumen yang mencari solusi praktis namun tidak ingin mengorbankan estetika." },
+                    advertising_strategy: { positioning: "Problem solver premium.", key_differentiator: "Efektivitas tinggi dengan desain yang menawan.", campaign_tone: "Informatif, dinamis, dan meyakinkan." },
+                    hook: { duration: "0:00 - 0:02", objective: "Relatabilitas instan terhadap sebuah masalah.", visual_description: `Kondisi visual yang mewakili masalah: ${catData.problem}. Ditampilkan dengan pergerakan kamera cepat (whip pan).` },
+                    storyline: { summary: "Dimulai dengan ketidaksempurnaan atau kebutuhan, lalu produk muncul secara dramatis untuk menyelesaikannya, diakhiri dengan hasil yang memuaskan.", scene_count: "3" },
+                    scenes: [
+                        { scene: 1, duration: "2 detik", purpose: "Menyajikan Masalah (The Pain Point)", product_focus: "Bukan produk, melainkan situasi atau properti yang kurang optimal", hand_action: "Tangan dengan gestur ragu, mencari, atau menyentuh permukaan bermasalah", camera_angle: "High angle (Kesan tertekan/butuh solusi)", camera_movement: "Kamera sedikit bergetar (Handheld feel)", composition: "Agak sesak (Tight framing)", background: "Agak redup (Desaturated tone)", lighting: "Pencahayaan datar atau shadow tegas", visual_effect: "Warna lebih dingin (Cool tones)", on_screen_text: "MASIH MENGALAMI INI?", transition: "Light flash / Snap Zoom ke adegan 2" },
+                        { scene: 2, duration: "4 detik", purpose: "Pahlawan Muncul (The Solution Reveal)", product_focus: `Produk ${productName} beraksi menyelesaikan masalah`, hand_action: catData.action, camera_angle: "Dynamic tilt up", camera_movement: "Push in cepat dan mengunci fokus pada produk", composition: "Heroic center framing", background: catData.env, lighting: "Lampu terang menyala tiba-tiba menerangi produk (Dynamic lighting shift)", visual_effect: "Warna berubah menjadi cerah, saturasi naik", on_screen_text: "SOLUSI TEPAT UNTUKMU.", transition: "Smooth swipe" },
+                        { scene: 3, duration: "3 detik", purpose: "Menunjukkan Hasil (The Relief) & CTA", product_focus: "Detail hasil kerja produk yang memuaskan", hand_action: "Tangan mengusap atau menunjukkan hasil akhir yang sempurna", camera_angle: "Close-up", camera_movement: "Pan lambat menelusuri hasil akhir", composition: "Clean and balanced", background: "Terang benderang dan bersih", lighting: "Pencahayaan komersial cerah (High-key)", visual_effect: "Kilau bersih (Sparkle effect) subtil", on_screen_text: "BUKTIKAN SENDIRI.\nDapatkan Promo Spesial.", transition: "Fade to black" }
+                    ],
+                    cinematography: { color_palette: "Transisi dari tone dingin/kusam ke tone cerah, hangat, dan hidup.", lighting_style: "Dynamic shifting light (dari redup ke terang benderang).", depth_of_field: "Fokus tajam pada saat produk muncul sebagai solusi.", focus_strategy: "Snap zoom focus shift.", visual_quality: "8k, iklan TVC modern bertempo cepat." },
+                    audio_direction: { music_style: "Dimulai dengan ketukan misterius, berubah menjadi musik upbeat yang memotivasi.", sound_effects: "Suara 'ding' atau 'swoosh' tegas saat produk muncul.", voice_over: "Narator dengan nada meyakinkan." },
+                    call_to_action: { headline: "Ubah Pengalamanmu.", supporting_text: "Solusi premium ada di sini.", closing_message: "Beli Sekarang." },
+                    negative_prompt: negPrompt,
+                    master_prompt: `Iklan komersial problem-solution dinamis rasio ${vRatio} untuk produk ${productName}. Konsep visual menampilkan transisi dramatis: Adegan pertama bernuansa redup menunjukkan masalah (${catData.problem}) tanpa wajah manusia. Tiba-tiba terjadi pergerakan kamera cepat (snap zoom) mengungkap produk utama di bawah pencahayaan studio yang mendadak terang benderang beralih ke tone hangat. Tangan manusia (tanpa wajah/kepala) melakukan aksi: ${catData.action} untuk memamerkan ${catData.solution}. Detail menyoroti ${catData.texture}. Set lokasi berada di ${catData.env}. Resolusi 8K, fotorealistik kelas atas, sangat tajam. ATURAN WAJIB: SAMA SEKALI TIDAK ADA WAJAH, KEPALA, ATAU MATA MANUSIA. Hanya tangan yang elegan.`
+                };
+
+                return {
+                    creative_option_1: concept1,
+                    creative_option_2: concept2,
+                    creative_option_3: concept3
+                };
+            }
+
+            // Generate HTML for each Concept block
+            function createConceptHTML(index, title, angle, jsonObj) {
+                const jsonString = JSON.stringify(jsonObj, null, 2);
+                
+                return `
+                <div class="bg-[#1e1e1e] border border-[#333] rounded-xl overflow-hidden shadow-lg animate-fade-in" style="animation-delay: ${index * 0.15}s;">
+                    <div class="px-4 py-3 border-b border-[#333] flex justify-between items-center bg-[#252526] sticky top-0 z-10">
+                        <div>
+                            <h4 class="text-white font-medium text-sm">${title}</h4>
+                            <p class="text-xs text-blue-400 mt-0.5">Commercial Angle: <span class="font-semibold text-slate-300">${angle}</span></p>
+                        </div>
+                        <button class="copy-concept-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-[#333] hover:bg-[#444] rounded-md transition-colors border border-[#444]" data-json='${jsonString.replace(/'/g, "&#39;")}'>
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy JSON
+                        </button>
+                    </div>
+                    <div class="relative bg-[#1d1f21]">
+                        <pre class="m-0 p-4 text-[13px] leading-relaxed overflow-x-auto"><code class="language-json">${Prism.highlight(jsonString, Prism.languages.json, 'json')}</code></pre>
+                    </div>
+                </div>
+                `;
+            }
+
+            generateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Form validation
+                const nameInput = document.getElementById('product-name').value;
+                if(!nameInput) {
+                    document.getElementById('product-name').focus();
+                    document.getElementById('product-name').classList.add('border-red-300', 'ring-red-100');
+                    setTimeout(() => document.getElementById('product-name').classList.remove('border-red-300', 'ring-red-100'), 2000);
+                    return;
+                }
+
+                const categoryInput = document.getElementById('product-category').value;
+                const goalInput = document.getElementById('video-goal').value;
+                const ratioInput = document.getElementById('video-ratio-input').value;
+
+                // UI State: Loading
+                generateBtn.disabled = true;
+                btnText.classList.add('opacity-0');
+                btnLoader.classList.remove('hidden');
+
+                // Simulate brief generation delay
+                setTimeout(() => {
+                    // Reset Button State
+                    generateBtn.disabled = false;
+                    btnText.classList.remove('opacity-0');
+                    btnLoader.classList.add('hidden');
+
+                    // Instantly Generate the 3 Concepts
+                    fullJSONData = generateDynamicJSON(nameInput, categoryInput, goalInput, ratioInput);
+                    
+                    // Inject HTML blocks for each concept
+                    conceptsContainer.innerHTML = ''; // clear previous
+                    
+                    conceptsContainer.innerHTML += createConceptHTML(1, "Creative Concept 1", "Product Attraction (Visual Hero)", fullJSONData.creative_option_1);
+                    conceptsContainer.innerHTML += createConceptHTML(2, "Creative Concept 2", "Lifestyle Experience", fullJSONData.creative_option_2);
+                    conceptsContainer.innerHTML += createConceptHTML(3, "Creative Concept 3", "Problem Solution", fullJSONData.creative_option_3);
+
+                    // Re-init icons for the new HTML
+                    lucide.createIcons();
+                    
+                    // Attach Copy Event Listeners to the new buttons
+                    document.querySelectorAll('.copy-concept-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const jsonToCopy = this.getAttribute('data-json');
+                            const textArea = document.createElement("textarea");
+                            textArea.value = jsonToCopy;
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            try {
+                                document.execCommand('copy');
+                                const originalHTML = this.innerHTML;
+                                this.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5 text-green-400"></i> Copied!';
+                                lucide.createIcons({root: this});
+                                setTimeout(() => {
+                                    this.innerHTML = originalHTML;
+                                    lucide.createIcons({root: this});
+                                }, 2000);
+                            } catch (err) {
+                                console.error('Failed to copy', err);
+                            }
+                            document.body.removeChild(textArea);
+                        });
+                    });
+
+                    // Transition UI state to Editor View
+                    outputEmpty.classList.add('hidden');
+                    outputCard.classList.remove('min-h-[300px]', 'p-2', 'border-slate-200');
+                    outputCard.classList.add('h-[600px]', 'p-0', 'border-[#333]');
+                    outputEditor.classList.remove('hidden');
+                    
+                    // Scroll into view
+                    outputCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                }, 800); 
+            });
+
+            // --- Download All JSON Action ---
+            downloadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if(!fullJSONData || Object.keys(fullJSONData).length === 0) return;
+                
+                const blob = new Blob([JSON.stringify(fullJSONData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ai_commercial_blueprints.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // --- Settings Save & Toast Notification Logic ---
+            const saveSettingsBtn = document.getElementById('save-settings-btn');
+            const saveSettingsText = document.getElementById('save-settings-text');
+            const saveSettingsLoader = document.getElementById('save-settings-loader');
+            const settingsEmail = document.getElementById('settings-email');
+            const notifToggle = document.getElementById('settings-notif-toggle');
+            const toastContainer = document.getElementById('toast-container');
+            
+            // Elemen tambahan untuk sinkronisasi nama
+            const settingsFullName = document.getElementById('settings-full-name');
+            const headerUserName = document.getElementById('header-user-name');
+            const headerUserAvatar = document.getElementById('header-user-avatar');
+            const settingsUserAvatar = document.getElementById('settings-user-avatar');
+
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-3 px-4 py-3 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border pointer-events-auto bg-white text-slate-800 ${type === 'success' ? 'border-green-200' : 'border-red-200'}`;
+                
+                const icon = type === 'success' 
+                    ? '<i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>' 
+                    : '<i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i>';
+                
+                toast.innerHTML = `
+                    ${icon}
+                    <p class="text-sm font-medium">${message}</p>
+                `;
+                
+                toastContainer.appendChild(toast);
+                lucide.createIcons({root: toast});
+                
+                // Animate In
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-y-10', 'opacity-0');
+                    toast.classList.add('translate-y-0', 'opacity-100');
+                });
+                
+                // Auto Remove after 4 seconds
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-2', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            }
+
+            if(saveSettingsBtn) {
+                saveSettingsBtn.addEventListener('click', () => {
+                    const emailVal = settingsEmail.value.trim();
+                    const nameVal = settingsFullName.value.trim();
+                    const isNotifEnabled = notifToggle.checked;
+                    
+                    // Simple email validation
+                    if(!emailVal || !emailVal.includes('@') || !emailVal.includes('.')) {
+                        showToast('Please enter a valid email address.', 'error');
+                        return;
+                    }
+
+                    // Validasi nama
+                    if(!nameVal) {
+                        showToast('Please enter your full name.', 'error');
+                        return;
+                    }
+
+                    // UI State: Loading
+                    saveSettingsBtn.disabled = true;
+                    saveSettingsText.textContent = 'Saving...';
+                    saveSettingsLoader.classList.remove('hidden');
+
+                    // Simulate API Delay
+                    setTimeout(() => {
+                        // Reset Button State
+                        saveSettingsBtn.disabled = false;
+                        saveSettingsText.textContent = 'Save Changes';
+                        saveSettingsLoader.classList.add('hidden');
+                        
+                        // --- Update Nama di Header dan Avatar ---
+                        headerUserName.textContent = nameVal;
+                        
+                        // Update inisial avatar dari API UI-Avatars berdasarkan nama baru
+                        const encodedName = encodeURIComponent(nameVal);
+                        const avatarUrl = `https://ui-avatars.com/api/?name=${encodedName}&background=e2e8f0&color=475569`;
+                        headerUserAvatar.src = avatarUrl;
+                        settingsUserAvatar.src = avatarUrl;
+                        
+                        // Show Success Message based on toggle state
+                        if(isNotifEnabled) {
+                            showToast(`Profile updated for ${nameVal}! Notifications sent to ${emailVal}`);
+                        } else {
+                            showToast(`Profile updated for ${nameVal}! Email notifications are turned off.`);
+                        }
+                        
+                    }, 1000);
+                });
+            }
+
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>
